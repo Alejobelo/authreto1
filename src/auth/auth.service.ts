@@ -26,24 +26,29 @@ export class AuthService {
   }
 
   async login(userObjectLogin: LoginAuthDto) {
-    const { email } = userObjectLogin;
-    const findUser = await this.usersModel.findOne({ email: email });
-    if (!findUser) throw new HttpException('USER_NOT:FOUND', 404);
+    
+    try {
+      const { email } = userObjectLogin;
+      const findUser = await this.usersModel.findOne({ email: email });
+      if (!findUser) throw new HttpException('USER_NOT:FOUND', 404);
 
-    const checkPassword = await compare(
-      userObjectLogin.password,
-      findUser.password,
-    );
-    if (!checkPassword) throw new HttpException('PASSWORD_INCORRECT', 403);
+      const checkPassword = await compare(
+        userObjectLogin.password,
+        findUser.password,
+      );
+      if (!checkPassword) throw new HttpException('PASSWORD_INCORRECT', 403);
 
-    const payload = { id: findUser._id, name: findUser.name };
-    const token = await this.jwtService.sign(payload);
+      const payload = { id: findUser._id, name: findUser.name };
+      const token = await this.jwtService.sign(payload);
 
-    const data = {
-      user: findUser,
-      token,
-    };
-    return data;
+      const data = {
+        user: findUser,
+        token,
+      };
+      return data;
+    } catch (error) {
+      throw error
+    }
   }
 
   async isAvaible(userAvaible: IsAvaibleAuthDto) {
